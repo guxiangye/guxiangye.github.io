@@ -1,7 +1,7 @@
 export default {
     input: 'src/Opanorama.js',
     output: {
-        file: 'src/Opanorama.js',
+        file: 'dist/Opanorama.js',
         format: 'umd',
         name: 'Opanorama'
     }
