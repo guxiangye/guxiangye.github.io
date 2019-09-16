@@ -45,10 +45,13 @@
   .view { position: relative; width: 100%;height: 100%;overflow: hidden;}
   .big-bg {  height: 120%;position: relative; display: inline-block; }
   .big-bg img {  height: 100%;}
+  #box {position: absolute;
+    top: 100px;left: 100px; z-index: 99; width: 200px;height: 200px;background: Red;color: #fff;font-size: 20px;}
 </style>
 
 <body>
   <div class="view">
+    <div id="box"></div>
     <div class="big-bg" style="top: -66px; left: -453px;">
       <img src="./assets/bg.png" alt="" onload="readyFn();">
     </div>
@@ -59,7 +62,8 @@
   function readyFn() {
     'use strict';
     var dom = document.querySelector('.big-bg'),
-      img = dom.querySelector('img');
+      img = dom.querySelector('img'),
+      box = document.querySelector('#box');
     var IMG_W = img.width,
       IMG_H = img.height;
     var WIN_W = document.documentElement.clientWidth,
@@ -75,6 +79,10 @@
       var y = motion.y.toFixed(3);
       var z = motion.z.toFixed(3);
 
+      box.innerHTML = "x:"+x;
+      box.innerHTML += "<br/>y:"+y;
+      box.innerHTML += "<br/>z:"+z;
+
       var top = parseInt(dom.style.top, 10) || 0,
         left = parseInt(dom.style.left, 10) || 0;
       var _top, _left;
@@ -82,6 +90,10 @@
       _left = left + x;
       _top = _top >= 0 ? 0 : (_top < (WIN_H - IMG_H) ? (WIN_H - IMG_H) : _top);
       _left = _left >= 0 ? 0 : (_left < (WIN_W - IMG_W) ? (WIN_W - IMG_W) : _left);
+
+      console.log(_top)
+      console.log(_left)
+
       dom.style.top = _top + 'px';
       dom.style.left = _left + 'px';
     }, false);
