@@ -1,122 +1,148 @@
-<!--<!DOCTYPE html>-->
-<!--<html lang="en">-->
-<!--<head>-->
-<!--  <meta charset="UTF-8">-->
-<!--  <meta name="viewport" content="width=device-width,user-scalable=no" />-->
-<!--  <title>Document</title>-->
-<!--  <style type="text/css">-->
-<!--    #box {-->
-<!--      width: 200px;-->
-<!--      height: 200px;-->
-<!--      background: Red;-->
-<!--      color: #fff;-->
-<!--      font-size: 20px;-->
-<!--    }-->
-<!--  </style>-->
-<!--</head>-->
-<!--<body>-->
-<!--<div id="box"></div>-->
-<!--<script type="text/javascript">-->
-<!--  var box = document.querySelector('#box');-->
-<!--  window.addEventListener('devicemotion', function(e) {-->
-<!--    var motion = e.accelerationIncludingGravity;-->
-<!--    var x = motion.x.toFixed(3);-->
-<!--    var y = motion.y.toFixed(3);-->
-<!--    var z = motion.z.toFixed(3);-->
-<!--    box.innerHTML = "x:"+x;-->
-<!--    box.innerHTML += "<br/>y:"+y;-->
-<!--    box.innerHTML += "<br/>z:"+z;-->
-<!--  });-->
-<!--</script>-->
-<!--</body>-->
-<!--</html>-->
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <title>DeviceOrientationEvent</title>
-  <meta charset="UTF-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta charset="utf-8">
+  <title>Opanorama - H5全景</title>
+  <meta name="keywords" content="ThreeJS,全景,移动端,js库,手势,陀螺仪">
+  <meta name="description" itemprop="description" content="Opanorama是一个同时支持手势和陀螺仪的web全景的JS库">
+  <meta name="viewport" id="viewport"
+        content="width=device-width,initial-scale=1,minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      outline: 0;
+      letter-spacing:140%;
+      font-family: "Microsoft YaHei";
+    }
+
+    .panorama, .wrap{
+      position: absolute;
+      z-index: 0;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .wrap {
+      z-index: 10;
+    }
+
+    .qrcode-wrap {
+      z-index: 100;
+      background-color: #FFF;
+      padding: 20px;
+      position: absolute;
+      top:50%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+    }
+
+    .inner {
+      position: relative;
+      top: 80%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      margin: auto;
+      overflow: hidden;
+      background-color: rgba(250, 250, 250, 0.5);
+      padding: 10px;
+      text-align: center;
+    }
+
+    .title {
+      font-weight: bold;
+    }
+
+    .link {
+      background: none;
+      outline: none;
+      border: none;
+      color: #000;
+      font-weight: bold;
+    }
+    .btn-wrap{
+      margin-top: 10px;
+      text-align: center;
+    }
+  </style>
 </head>
-
-<style>
-  body {margin: 0; padding: 0;}
-  html, body { height: 100%;}
-  .view { position: relative; width: 100%;height: 100%;overflow: hidden;}
-  .big-bg {  height: 120%;position: relative; display: inline-block; }
-  .big-bg img {  height: 100%;}
-  #box {position: absolute;
-    top: 100px;left: 100px; z-index: 99; width: 200px;height: 200px;background: Red;color: #fff;font-size: 20px;}
-</style>
-
 <body>
-  <div class="view">
-    <div id="box"></div>
-    <div class="big-bg" style="top: -66px; left: -453px;">
-      <img src="./assets/bg.png" alt="" onload="readyFn();">
+<div class="panorama"></div>
+<div class="wrap" style="display: none;">
+  <div class="inner">
+    <p><span class="title">Opanorama.js</span> -- 基于Threejs，同时支持手势和陀螺仪的web全景JS库。</p>
+    <div class="btn-wrap">
+      <a class="link" target="_blank" href="https://github.com/azuoge/Opanorama">Github</a>
+      <span>&nbsp;&nbsp;</span>
+      <a class="link" id="show-qrcode" href="javascript:void(0);">H5示例</a>
     </div>
   </div>
-</body>
+</div>
+<div class="qrcode-wrap" style="display: none;">
+  <div><img width="200" src="./res/qrcode.png"></div>
+  <div class="btn-wrap">
+    [ <a class="link" id="close-qrcode" href="javascript:void(0);">关闭</a> ]
+  </div>
+</div>
+<script>
+  var ua = navigator.userAgent || '';
+  var isMobile = ua.match(/(iPad).*OS\s([\d_]+)/)
+    ||ua.match(/(iPhone\sOS)\s([\d_]+)/)
+    ||ua.match(/Android/);
+  (function(){
+    if(!isMobile){
+      document.querySelector('.wrap').style.display = 'block';
+    }
 
-<script type="text/javascript">
-  function readyFn() {
-    'use strict';
-    var dom = document.querySelector('.big-bg'),
-      img = dom.querySelector('img'),
-      box = document.querySelector('#box');
-    var IMG_W = img.width,
-      IMG_H = img.height;
-    var WIN_W = document.documentElement.clientWidth,
-      WIN_H = document.documentElement.clientHeight;
-    var timefragment = 0,               // 时间片计时
-      nowts = 0;                      // 当前时间
-    // 设置默认的left/top
-    dom.style.top = -(IMG_H - WIN_H) / 2 + 'px';
-    dom.style.left = -(IMG_W - WIN_W) / 2 + 'px';
-    window.addEventListener('devicemotion', function(e) {
-      var motion = e.accelerationIncludingGravity;
-      var x = motion.x.toFixed(3);
-      var y = motion.y.toFixed(3);
-      var z = motion.z.toFixed(3);
-
-      box.innerHTML = "x:"+x;
-      box.innerHTML += "<br/>y:"+y;
-      box.innerHTML += "<br/>z:"+z;
-
-      var top = parseInt(dom.style.top, 10) || 0,
-        left = parseInt(dom.style.left, 10) || 0;
-      var _top, _left;
-      _top = top + z;
-      _left = left + x;
-      _top = _top >= 0 ? 0 : (_top < (WIN_H - IMG_H) ? (WIN_H - IMG_H) : _top);
-      _left = _left >= 0 ? 0 : (_left < (WIN_W - IMG_W) ? (WIN_W - IMG_W) : _left);
-
-      console.log(_top)
-      console.log(_left)
-
-      dom.style.top = _top + 'px';
-      dom.style.left = _left + 'px';
-    }, false);
-
-    // window.addEventListener('deviceorientation', function (evt) {
-    //   nowts = new Date().getTime();
-    //   // 控制时间片
-    //   if (nowts  - timefragment > 37) {
-    //     timefragment = nowts;
-    //     var alpha = evt.alpha,          //垂直于屏幕的轴 0 ~ 360
-    //       beta = evt.beta,            //横向 X 轴 -180 ~ 180
-    //       gamma = evt.gamma;          //纵向 Y 轴 -90 ~ 90
-    //     var top = parseInt(dom.style.top, 10) || 0,
-    //       left = parseInt(dom.style.left, 10) || 0;
-    //     var _top, _left;
-    //     _top = top + (beta / 180 * 30);
-    //     _left = left + (gamma / 90 * 30);
-    //     _top = _top >= 0 ? 0 : (_top < (WIN_H - IMG_H) ? (WIN_H - IMG_H) : _top);
-    //     _left = _left >= 0 ? 0 : (_left < (WIN_W - IMG_W) ? (WIN_W - IMG_W) : _left);
-    //     dom.style.top = _top + 'px';
-    //     dom.style.left = _left + 'px';
-    //   }
-    // }, false);
-  }
+    var qrcodeWrap = document.querySelector('.qrcode-wrap');
+    document.querySelector('#show-qrcode').addEventListener('click', function () {
+      qrcodeWrap.style.display = 'block';
+    });
+    document.querySelector('#close-qrcode').addEventListener('click', function () {
+      qrcodeWrap.style.display = 'none';
+    });
+  })();
 </script>
+<script src="./three.js"></script>
+<script src="./dist/Opanorama.js"></script>
+<script>
+  (function(){
+    var longitude = 0,mark='add';
+    new Opanorama({
+      offsetLongitude: 0,
+      offsetLatitude: 90,
+      fov: 90,
+      url:  './res/'+(isMobile?Math.floor((Math.random()*3)):'pc')+'.jpg',
+      container: document.querySelector('.panorama'),
+      onFrame:function(lon, lat) {
+        if(isMobile){
+          return;
+        }
+        if(longitude ==360){
+          mark = 'sub';
+        }
+        if(longitude === 0){
+          mark = 'add';
+        }
+
+        switch(mark){
+          case 'add':
+            longitude += 0.05;
+            break;
+          case 'sub':
+            longitude -= 0.05;
+            break;
+        }
+        return {lon: lon + longitude,lat: -90}
+      }
+    });
+  })();
+</script>
+</body>
 </html>
